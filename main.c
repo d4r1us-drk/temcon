@@ -22,73 +22,125 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
+#include <stdbool.h>
+#include <ctype.h>
 
-double celsiusToFahrenheit(double celsius) {
-    return (celsius * 9 / 5) + 32;
+#define VERSION 0.1
+
+// Constants for temperature conversion types
+#define CELSIUS_TO_FAHRENHEIT 1
+#define CELSIUS_TO_KELVIN 3
+#define FAHRENHEIT_TO_CELSIUS 2
+#define FAHRENHEIT_TO_KELVIN 5
+#define KELVIN_TO_CELSIUS 4
+#define KELVIN_TO_FAHRENHEIT 6
+
+// Function to check if a string is numeric
+bool isNumeric(const char* str) {
+    for (int i = 0; str[i]; i++) {
+        if (!isdigit(str[i]) && str[i] != '.' && str[i] != '-') {
+            return false;
+        }
+    }
+    return true;
 }
 
-double fahrenheitToCelsius(double fahrenheit) {
-    return (fahrenheit - 32) * 5 / 9;
+// Function to convert temperature
+double convertTemperature(double value, int fromType, int toType) {
+    switch (fromType) {
+        case CELSIUS_TO_FAHRENHEIT:
+            return (value * 9 / 5) + 32;
+        case CELSIUS_TO_KELVIN:
+            return value + 273.15;
+        case FAHRENHEIT_TO_CELSIUS:
+            return (value - 32) * 5 / 9;
+        case FAHRENHEIT_TO_KELVIN:
+            return ((value - 32) * 5 / 9) + 273.15;
+        case KELVIN_TO_CELSIUS:
+            return value - 273.15;
+        case KELVIN_TO_FAHRENHEIT:
+            return ((value - 273.15) * 9 / 5) + 32;
+        default:
+            fprintf(stderr, "ERROR: Specify a valid type of conversion\n");
+            return -1;
+    }
 }
 
-double celsiusToKelvin(double celsius) {
-    return celsius + 273.15;
-}
-
-double kelvinToCelsius(double kelvin) {
-    return kelvin - 273.15;
-}
-
-double fahrenheitToKelvin(double fahrenheit) {
-    return ((fahrenheit - 32) * 5 / 9) + 273.15;
-}
-
-double kelvinToFahrenheit(double kelvin) {
-    return ((kelvin - 273.15) * 9 / 5) + 32;
-}
-
+// Function to display help
 void displayHelp() {
-    printf("Usage: temperature-converter [OPTION]...\n");
+    printf("Usage: temcon [OPTION] <value>\n");
     printf("Convert between temperature units.\n");
     printf("\nOptions:\n");
-    printf("  -c VALUE    Convert Celsius to Fahrenheit and Kelvin\n");
-    printf("  -f VALUE    Convert Fahrenheit to Celsius and Kelvin\n");
-    printf("  -k VALUE    Convert Kelvin to Celsius and Fahrenheit\n");
-    printf("  -h          Display this help message and exit.\n");
+    printf("\t-c, --celsius VALUE       Convert Celsius to Fahrenheit and Kelvin\n");
+    printf("\t-f, --fahrenheit VALUE    Convert Fahrenheit to Celsius and Kelvin\n");
+    printf("\t-k, --kelvin VALUE        Convert Kelvin to Celsius and Fahrenheit\n");
+    printf("\t-h, --help                Display this help message and exit.\n");
+    printf("\t-v, --version             Display the program version and exit.\n");
+}
+
+// Function to display version
+void displayVersion() {
+    printf("temcon. version: %.1lf\n", VERSION);
 }
 
 int main(int argc, char** argv) {
+    int option;
+    double value;
 
     if (argc == 1) {
         displayHelp();
         exit(0);
     }
 
-    int option;
-    double value;
+    static const char* const short_options = "c:f:k:hv";
+    static struct option long_options[] = {
+        {"celsius", required_argument, NULL, 'c'},
+        {"fahrenheit", required_argument, NULL, 'f'},
+        {"kelvin", required_argument, NULL, 'k'},
+        {"help", no_argument, NULL, 'h'},
+        {"version", no_argument, NULL, 'v'},
+        {NULL, 0, NULL, 0}
+    };
 
-    while ((option = getopt(argc, argv, "c:f:k:h")) != -1) {
+    while ((option = getopt_long(argc, argv, short_options, long_options, NULL)) != -1) {
         switch (option) {
             case 'c':
-                value = atof(optarg);
-                printf("%.2lf Celsius is equivalent to %.2lf Fahrenheit and %.2lf Kelvin\n",
-                       value, celsiusToFahrenheit(value), celsiusToKelvin(value));
-                break;
             case 'f':
-                value = atof(optarg);
-                printf("%.2lf Fahrenheit is equivalent to %.2lf Celsius and %.2lf Kelvin\n",
-                       value, fahrenheitToCelsius(value), fahrenheitToKelvin(value));
-                break;
             case 'k':
+                if (!isNumeric(optarg)) {
+                    fprintf(stderr, "Invalid value. Enter a valid number to convert.\n");
+                    return 1;
+                }
                 value = atof(optarg);
-                printf("%.2lf Kelvin is equivalent to %.2lf Celsius and %.2lf Fahrenheit\n",
-                       value, kelvinToCelsius(value), kelvinToFahrenheit(value));
+
+                int fromType, toType;
+                if (option == 'c') {
+                    fromType = CELSIUS_TO_FAHRENHEIT;
+                    toType = CELSIUS_TO_KELVIN;
+                } else if (option == 'f') {
+                    fromType = FAHRENHEIT_TO_CELSIUS;
+                    toType = FAHRENHEIT_TO_KELVIN;
+                } else {
+                    fromType = KELVIN_TO_CELSIUS;
+                    toType = KELVIN_TO_FAHRENHEIT;
+                }
+                printf("%.2lf %s is equivalent to %.2lf %s and %.2lf %s\n",
+                    value,
+                    option == 'c' ? "Celsius" : (option == 'f' ? "Fahrenheit" : "Kelvin"),
+                    convertTemperature(value, fromType, toType),
+                    option == 'c' ? "Fahrenheit" : (option == 'f' ? "Celsius" : "Fahrenheit"),
+                    convertTemperature(value, fromType, toType == CELSIUS_TO_KELVIN ? FAHRENHEIT_TO_KELVIN : KELVIN_TO_FAHRENHEIT),
+                    option == 'c' ? "Kelvin" : (option == 'f' ? "Kelvin" : "Celsius"));
                 break;
+
             case 'h':
                 displayHelp();
                 break;
-            default:
-                fprintf(stderr, "Invalid option. Use '-h' for help.\n");
+            case 'v':
+                displayVersion();
+                break;
+            case '?':
+                fprintf(stderr, "Invalid option. Use '-h, --help' for help.\n");
                 return 1;
         }
     }
