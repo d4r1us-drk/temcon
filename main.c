@@ -21,162 +21,81 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <termios.h>
+#include <getopt.h>
 
-void
-clearScreen ()
-{
+void clearScreen() {
     printf("\e[1;1H\e[2J");
 }
 
-void
-waitForKeypress ()
-{
-    struct termios oldt, newt;
-    tcgetattr(STDIN_FILENO, &oldt);
-    newt = oldt;
-    newt.c_lflag &= ~(ICANON | ECHO);
-    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-    while (getchar() != '\n');
-    getchar();
-    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-}
-
-double
-celsiusToFahrenheit (double celsius)
-{
+double celsiusToFahrenheit(double celsius) {
     return (celsius * 9 / 5) + 32;
 }
 
-double
-fahrenheitToCelsius (double fahrenheit)
-{
+double fahrenheitToCelsius(double fahrenheit) {
     return (fahrenheit - 32) * 5 / 9;
 }
 
-double
-celsiusToKelvin (double celsius)
-{
+double celsiusToKelvin(double celsius) {
     return celsius + 273.15;
 }
 
-double
-kelvinToCelsius (double kelvin)
-{
+double kelvinToCelsius(double kelvin) {
     return kelvin - 273.15;
 }
 
-double
-fahrenheitToKelvin (double fahrenheit)
-{
+double fahrenheitToKelvin(double fahrenheit) {
     return ((fahrenheit - 32) * 5 / 9) + 273.15;
 }
 
-double
-kelvinToFahrenheit (double kelvin)
-{
+double kelvinToFahrenheit(double kelvin) {
     return ((kelvin - 273.15) * 9 / 5) + 32;
 }
 
-void
-showMenu ()
-{
-    printf("Select the type of conversion you want to perform:\n");
-    printf("\t1. Celsius to Fahrenheit\n");
-    printf("\t2. Fahrenheit to Celsius\n");
-    printf("\t3. Celsius to Kelvin\n");
-    printf("\t4. Kelvin to Celsius\n");
-    printf("\t5. Fahrenheit to Kelvin\n");
-    printf("\t6. Kelvin to Fahrenheit\n");
-    printf("\t7. Exit\n");
+void displayHelp() {
+    printf("Usage: temperature-converter [OPTION]...\n");
+    printf("Convert between temperature units.\n");
+    printf("\nOptions:\n");
+    printf("  -c VALUE    Convert Celsius to Fahrenheit and Kelvin\n");
+    printf("  -f VALUE    Convert Fahrenheit to Celsius and Kelvin\n");
+    printf("  -k VALUE    Convert Kelvin to Celsius and Fahrenheit\n");
+    printf("  -h          Display this help message and exit.\n");
 }
 
-int
-getInputOption ()
-{
+int main(int argc, char** argv) {
+
+    if (argc == 1) {
+        displayHelp();
+        exit(0);
+    }
+
     int option;
-    printf("Choose [1, 2, 3, 4, 5, 6, 7]: ");
-    scanf("%d", &option);
-    return option;
-}
+    double value;
 
-double
-getInputTemperature ()
-{
-    double temperature;
-    printf("Enter the temperature: ");
-    scanf("%lf", &temperature);
-    return temperature;
-}
-
-void
-processConversion (int option, double input)
-{
-    double result;
-    switch (option)
-    {
-        case 1:
-            result = celsiusToFahrenheit(input);
-            printf("%.2lf Celsius is equivalent to %.2lf Fahrenheit\n",
-                                                        input, result);
-            break;
-        case 2:
-            result = fahrenheitToCelsius(input);
-            printf("%.2lf Fahrenheit is equivalent to %.2lf Celsius\n",
-                                                        input, result);
-            break;
-        case 3:
-            result = celsiusToKelvin(input);
-            printf("%.2lf Celsius is equivalent to %.2lf Kelvin\n",
-                                                    input, result);
-            break;
-        case 4:
-            result = kelvinToCelsius(input);
-            printf("%.2lf Kelvin is equivalent to %.2lf Celsius\n",
-                                                    input, result);
-            break;
-        case 5:
-            result = fahrenheitToKelvin(input);
-            printf("%.2lf Fahrenheit is equivalent to %.2lf Kelvin\n",
-                                                       input, result);
-            break;
-        case 6:
-            result = kelvinToFahrenheit(input);
-            printf("%.2lf Kelvin is equivalent to %.2lf Fahrenheit\n",
-                                                       input, result);
-            break;
-        default:
-            printf("Invalid option\n");
-            return;
-    }
-}
-
-int
-main (int argc,
-      char *argv[])
-{
-    while (1)
-    {
-        clearScreen();
-        showMenu();
-        int option = getInputOption();
-        if (option == 7)
-        {
-            printf("Exiting...\n");
-            break;
-        }
-        if (option >= 1 && option <= 6)
-        {
-            double input = getInputTemperature();
-            processConversion(option, input);
-            printf("Press any key to continue... ");
-            waitForKeypress();
-        }
-        else
-        {
-            printf("Invalid option. Select an option between 1 and 7.\n");
+    while ((option = getopt(argc, argv, "c:f:k:h")) != -1) {
+        switch (option) {
+            case 'c':
+                value = atof(optarg);
+                printf("%.2lf Celsius is equivalent to %.2lf Fahrenheit and %.2lf Kelvin\n",
+                       value, celsiusToFahrenheit(value), celsiusToKelvin(value));
+                break;
+            case 'f':
+                value = atof(optarg);
+                printf("%.2lf Fahrenheit is equivalent to %.2lf Celsius and %.2lf Kelvin\n",
+                       value, fahrenheitToCelsius(value), fahrenheitToKelvin(value));
+                break;
+            case 'k':
+                value = atof(optarg);
+                printf("%.2lf Kelvin is equivalent to %.2lf Celsius and %.2lf Fahrenheit\n",
+                       value, kelvinToCelsius(value), kelvinToFahrenheit(value));
+                break;
+            case 'h':
+                displayHelp();
+                break;
+            default:
+                fprintf(stderr, "Invalid option. Use '-h' for help.\n");
+                return 1;
         }
     }
-    return EXIT_SUCCESS;
+
+    return 0;
 }
