@@ -87,6 +87,11 @@ int main(int argc, char** argv) {
     int option;
     double value;
 
+    for (int i = optind; i < argc; i++) {
+        if (argv[i][0] != '-' || argv[i][0] != '\0')
+            fprintf(stderr, "Invalid option %s. Use '-h, --help' for help.\n", argv[i]);
+    }
+
     if (argc == 1) {
         displayHelp();
         exit(0);
