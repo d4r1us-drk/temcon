@@ -23,10 +23,6 @@
 #include <stdlib.h>
 #include <getopt.h>
 
-void clearScreen() {
-    printf("\e[1;1H\e[2J");
-}
-
 double celsiusToFahrenheit(double celsius) {
     return (celsius * 9 / 5) + 32;
 }
