@@ -41,7 +41,7 @@ double convertTemperature(double value, int fromType, int toType);
 void displayHelp();
 void displayVersion();
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
     int option;
     double value;
 
