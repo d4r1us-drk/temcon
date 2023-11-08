@@ -35,6 +35,85 @@
 #define KELVIN_TO_CELSIUS 4
 #define KELVIN_TO_FAHRENHEIT 6
 
+// Function prototypes
+bool isNumeric(const char* str);
+double convertTemperature(double value, int fromType, int toType);
+void displayHelp();
+void displayVersion();
+
+int main(int argc, char** argv) {
+    int option;
+    double value;
+
+    if (argc == 1) {
+        displayHelp();
+        return 0;
+    }
+
+    static const char* const short_options = "c:f:k:hv";
+    static struct option long_options[] = {
+        {"celsius", required_argument, NULL, 'c'},
+        {"fahrenheit", required_argument, NULL, 'f'},
+        {"kelvin", required_argument, NULL, 'k'},
+        {"help", no_argument, NULL, 'h'},
+        {"version", no_argument, NULL, 'v'},
+        {NULL, 0, NULL, 0}
+    };
+
+    while ((option = getopt_long(argc, argv, short_options, long_options, NULL)) != -1) {
+        switch (option) {
+            case 'c':
+            case 'f':
+            case 'k':
+                if (!isNumeric(optarg)) {
+                    fprintf(stderr, "Invalid value. Enter a valid number to convert.\n");
+                    return 1;
+                }
+
+                value = atof(optarg);
+
+                int fromType, toType;
+                if (option == 'c') {
+                    fromType = CELSIUS_TO_FAHRENHEIT;
+                    toType = CELSIUS_TO_KELVIN;
+                } else if (option == 'f') {
+                    fromType = FAHRENHEIT_TO_CELSIUS;
+                    toType = FAHRENHEIT_TO_KELVIN;
+                } else {
+                    fromType = KELVIN_TO_CELSIUS;
+                    toType = KELVIN_TO_FAHRENHEIT;
+                }
+                printf("%.2lf %s is equivalent to %.2lf %s and %.2lf %s\n",
+                    value,
+                    option == 'c' ? "Celsius" : (option == 'f' ? "Fahrenheit" : "Kelvin"),
+                    convertTemperature(value, fromType, toType),
+                    option == 'c' ? "Fahrenheit" : (option == 'f' ? "Celsius" : "Fahrenheit"),
+                    convertTemperature(value, fromType, toType == CELSIUS_TO_KELVIN ? FAHRENHEIT_TO_KELVIN : KELVIN_TO_FAHRENHEIT),
+                    option == 'c' ? "Kelvin" : (option == 'f' ? "Kelvin" : "Celsius"));
+                break;
+
+            case 'h':
+                displayHelp();
+                break;
+            case 'v':
+                displayVersion();
+                break;
+            case '?':
+                fprintf(stderr, "Use '-h, --help' for help.\n");
+                return 1;
+        }
+    }
+
+    // Check for unsupported options
+    for (int i = optind; i < argc; i++) {
+        if (argv[i][0] != '-') {
+            fprintf(stderr, "Invalid option or argument '%s'. Use '-h, --help' for help.\n", argv[i]);
+        }
+    }
+
+    return 0;
+}
+
 // Function to check if a string is numeric
 bool isNumeric(const char* str) {
     for (int i = 0; str[i]; i++) {
@@ -81,74 +160,4 @@ void displayHelp() {
 // Function to display version
 void displayVersion() {
     printf("temcon. version: %.1lf\n", VERSION);
-}
-
-int main(int argc, char** argv) {
-    int option;
-    double value;
-
-    for (int i = optind; i < argc; i++) {
-        if (argv[i][0] != '-' || argv[i][0] != '\0')
-            fprintf(stderr, "Invalid option %s. Use '-h, --help' for help.\n", argv[i]);
-    }
-
-    if (argc == 1) {
-        displayHelp();
-        exit(0);
-    }
-
-    static const char* const short_options = "c:f:k:hv";
-    static struct option long_options[] = {
-        {"celsius", required_argument, NULL, 'c'},
-        {"fahrenheit", required_argument, NULL, 'f'},
-        {"kelvin", required_argument, NULL, 'k'},
-        {"help", no_argument, NULL, 'h'},
-        {"version", no_argument, NULL, 'v'},
-        {NULL, 0, NULL, 0}
-    };
-
-    while ((option = getopt_long(argc, argv, short_options, long_options, NULL)) != -1) {
-        switch (option) {
-            case 'c':
-            case 'f':
-            case 'k':
-                if (!isNumeric(optarg)) {
-                    fprintf(stderr, "Invalid value. Enter a valid number to convert.\n");
-                    return 1;
-                }
-                value = atof(optarg);
-
-                int fromType, toType;
-                if (option == 'c') {
-                    fromType = CELSIUS_TO_FAHRENHEIT;
-                    toType = CELSIUS_TO_KELVIN;
-                } else if (option == 'f') {
-                    fromType = FAHRENHEIT_TO_CELSIUS;
-                    toType = FAHRENHEIT_TO_KELVIN;
-                } else {
-                    fromType = KELVIN_TO_CELSIUS;
-                    toType = KELVIN_TO_FAHRENHEIT;
-                }
-                printf("%.2lf %s is equivalent to %.2lf %s and %.2lf %s\n",
-                    value,
-                    option == 'c' ? "Celsius" : (option == 'f' ? "Fahrenheit" : "Kelvin"),
-                    convertTemperature(value, fromType, toType),
-                    option == 'c' ? "Fahrenheit" : (option == 'f' ? "Celsius" : "Fahrenheit"),
-                    convertTemperature(value, fromType, toType == CELSIUS_TO_KELVIN ? FAHRENHEIT_TO_KELVIN : KELVIN_TO_FAHRENHEIT),
-                    option == 'c' ? "Kelvin" : (option == 'f' ? "Kelvin" : "Celsius"));
-                break;
-
-            case 'h':
-                displayHelp();
-                break;
-            case 'v':
-                displayVersion();
-                break;
-            case '?':
-                fprintf(stderr, "Invalid option. Use '-h, --help' for help.\n");
-                return 1;
-        }
-    }
-
-    return 0;
 }
