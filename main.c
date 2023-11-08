@@ -30,10 +30,10 @@
 // Constants for temperature conversion types
 #define CELSIUS_TO_FAHRENHEIT 1
 #define FAHRENHEIT_TO_CELSIUS 2
-#define CELSIUS_TO_KELVIN     3
-#define KELVIN_TO_CELSIUS     4
-#define FAHRENHEIT_TO_KELVIN  5
-#define KELVIN_TO_FAHRENHEIT  6
+#define CELSIUS_TO_KELVIN 3
+#define KELVIN_TO_CELSIUS 4
+#define FAHRENHEIT_TO_KELVIN 5
+#define KELVIN_TO_FAHRENHEIT 6
 
 // Function prototypes
 bool isNumeric(const char* str);
@@ -45,11 +45,13 @@ int main(int argc, char **argv) {
     int option;
     double value;
 
+    // Check if there are no command-line arguments
     if (argc == 1) {
         displayHelp();
         return 0;
     }
 
+    // Define short and long options for command-line argument parsing
     static const char* const short_options = "c:f:k:hv";
     static struct option long_options[] = {
         {"celsius", required_argument, NULL, 'c'},
@@ -60,32 +62,36 @@ int main(int argc, char **argv) {
         {NULL, 0, NULL, 0}
     };
 
+    // Parse command-line arguments
     while ((option = getopt_long(argc, argv, short_options, long_options, NULL)) != -1) {
         switch (option) {
             case 'c':
             case 'f':
             case 'k':
+                // Check if the argument is numeric
                 if (!isNumeric(optarg)) {
                     fprintf(stderr, "Invalid value. Enter a valid number to convert.\n");
                     return 1;
                 }
 
+                // Convert the argument to a double
                 value = atof(optarg);
 
-                int con1, con2;
+                int fromType, toType;
                 if (option == 'c') {
-                    con1 = CELSIUS_TO_FAHRENHEIT;
-                    con2 = CELSIUS_TO_KELVIN;
+                    fromType = CELSIUS_TO_FAHRENHEIT;
+                    toType = CELSIUS_TO_KELVIN;
                 } else if (option == 'f') {
-                    con1 = FAHRENHEIT_TO_CELSIUS;
-                    con2 = FAHRENHEIT_TO_KELVIN;
+                    fromType = FAHRENHEIT_TO_CELSIUS;
+                    toType = FAHRENHEIT_TO_KELVIN;
                 } else {
-                    con1 = KELVIN_TO_CELSIUS;
-                    con2 = KELVIN_TO_FAHRENHEIT;
+                    fromType = KELVIN_TO_CELSIUS;
+                    toType = KELVIN_TO_FAHRENHEIT;
                 }
 
-                double result1 = convertTemperature(value, con1);
-                double result2 = convertTemperature(value, con2);
+                // Convert the temperature and print the results
+                double result1 = convertTemperature(value, fromType);
+                double result2 = convertTemperature(value, toType);
                 
                 printf("%.2lf %s is equivalent to %.2lf %s and %.2lf %s\n",
                         value,
@@ -97,18 +103,21 @@ int main(int argc, char **argv) {
                 break;
 
             case 'h':
+                // Display help message
                 displayHelp();
                 break;
             case 'v':
+                // Display program version
                 displayVersion();
                 break;
             case '?':
+                // Handle unrecognized options
                 fprintf(stderr, "Use '-h, --help' for help.\n");
                 return 1;
         }
     }
 
-    // Check for unsupported options
+    // Check for unsupported options or arguments
     for (int i = optind; i < argc; i++) {
         if (argv[i][0] != '-') {
             fprintf(stderr, "Invalid option or argument '%s'. Use '-h, --help' for help.\n", argv[i]);
@@ -121,6 +130,7 @@ int main(int argc, char **argv) {
 // Function to check if a string is numeric
 bool isNumeric(const char* str) {
     for (int i = 0; str[i]; i++) {
+        // Check if each character is a digit, a dot (for decimals), or a minus sign (for negative numbers)
         if (!isdigit(str[i]) && str[i] != '.' && str[i] != '-') {
             return false;
         }
