@@ -29,15 +29,15 @@
 
 // Constants for temperature conversion types
 #define CELSIUS_TO_FAHRENHEIT 1
-#define CELSIUS_TO_KELVIN 3
 #define FAHRENHEIT_TO_CELSIUS 2
-#define FAHRENHEIT_TO_KELVIN 5
-#define KELVIN_TO_CELSIUS 4
-#define KELVIN_TO_FAHRENHEIT 6
+#define CELSIUS_TO_KELVIN     3
+#define KELVIN_TO_CELSIUS     4
+#define FAHRENHEIT_TO_KELVIN  5
+#define KELVIN_TO_FAHRENHEIT  6
 
 // Function prototypes
 bool isNumeric(const char* str);
-double convertTemperature(double value, int fromType, int toType);
+double convertTemperature(double value, int type);
 void displayHelp();
 void displayVersion();
 
@@ -72,24 +72,28 @@ int main(int argc, char **argv) {
 
                 value = atof(optarg);
 
-                int fromType, toType;
+                int con1, con2;
                 if (option == 'c') {
-                    fromType = CELSIUS_TO_FAHRENHEIT;
-                    toType = CELSIUS_TO_KELVIN;
+                    con1 = CELSIUS_TO_FAHRENHEIT;
+                    con2 = CELSIUS_TO_KELVIN;
                 } else if (option == 'f') {
-                    fromType = FAHRENHEIT_TO_CELSIUS;
-                    toType = FAHRENHEIT_TO_KELVIN;
+                    con1 = FAHRENHEIT_TO_CELSIUS;
+                    con2 = FAHRENHEIT_TO_KELVIN;
                 } else {
-                    fromType = KELVIN_TO_CELSIUS;
-                    toType = KELVIN_TO_FAHRENHEIT;
+                    con1 = KELVIN_TO_CELSIUS;
+                    con2 = KELVIN_TO_FAHRENHEIT;
                 }
+
+                double result1 = convertTemperature(value, con1);
+                double result2 = convertTemperature(value, con2);
+                
                 printf("%.2lf %s is equivalent to %.2lf %s and %.2lf %s\n",
-                    value,
-                    option == 'c' ? "Celsius" : (option == 'f' ? "Fahrenheit" : "Kelvin"),
-                    convertTemperature(value, fromType, toType),
-                    option == 'c' ? "Fahrenheit" : (option == 'f' ? "Celsius" : "Fahrenheit"),
-                    convertTemperature(value, fromType, toType == CELSIUS_TO_KELVIN ? FAHRENHEIT_TO_KELVIN : KELVIN_TO_FAHRENHEIT),
-                    option == 'c' ? "Kelvin" : (option == 'f' ? "Kelvin" : "Celsius"));
+                        value,
+                        option == 'c' ? "Celsius" : (option == 'f' ? "Fahrenheit" : "Kelvin"),
+                        result1,
+                        option == 'c' ? "Fahrenheit" : (option == 'f' ? "Celsius" : "Fahrenheit"),
+                        result2,
+                        option == 'c' ? "Kelvin" : (option == 'f' ? "Kelvin" : "Celsius"));
                 break;
 
             case 'h':
@@ -125,8 +129,8 @@ bool isNumeric(const char* str) {
 }
 
 // Function to convert temperature
-double convertTemperature(double value, int fromType, int toType) {
-    switch (fromType) {
+double convertTemperature(double value, int type) {
+    switch (type) {
         case CELSIUS_TO_FAHRENHEIT:
             return (value * 9 / 5) + 32;
         case CELSIUS_TO_KELVIN:
