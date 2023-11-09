@@ -1,7 +1,7 @@
-# Temperature Converter (temcon)
+# temcon - Temperature Converter Tool
 
 ## Introduction
-`temcon` is a command-line program that allows you to convert temperatures between Celsius, Fahrenheit, and Kelvin. This program is free software and is distributed under the GNU General Public License (GPL) version 3.0 or later.
+`temcon` is a simple command-line utility that allows you to convert temperatures between Celsius, Fahrenheit, and Kelvin.
 
 ## Usage
 ```
@@ -32,7 +32,8 @@ temcon [OPTION] <value>
   ```
 
 ## License
-This program is free software and is distributed under the terms of the GNU General Public License (GPL) version 3.0 or later. For more details, please see the [GNU General Public License](http://www.gnu.org/licenses/).
+This project is licensed under the GPLv3 License - see the [LICENSE](LICENSE)
+file for details.
 
 ## Version
 `temcon` version: 0.1
