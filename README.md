@@ -11,7 +11,8 @@
 - [License](#license)
 
 ## Introduction
-`temcon` is a simple command-line utility that allows you to convert temperatures between Celsius, Fahrenheit, and Kelvin.
+`temcon` is a simple command-line utility that allows you to convert
+temperatures between Celsius, Fahrenheit, and Kelvin.
 
 ## Building
 
