@@ -1,4 +1,4 @@
-# temcon - Temperature Converter Tool
+# temcon - Temperature Conversion Tool
 
 ## Table of Contents
 
