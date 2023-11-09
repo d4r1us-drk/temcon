@@ -51,7 +51,7 @@ temcon [OPTION] <value>
 - `-h, --help`                Display this help message and exit.
 - `-v, --version`             Display the program version and exit.
 
-## Example Usage
+## Examples
 1. To convert 25 degrees Celsius to Fahrenheit and Kelvin:
   ```bash
   temcon -c 25
